@@ -1,0 +1,419 @@
+---
+title: "stats_project_WillisBerkeley"
+author: "Berkeley Willis"
+date: February 27th 2020
+output:
+
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load required library
+library(ggplot2)
+library(class)
+library(dplyr)
+library(e1071)
+library(caret)
+
+# Go ahead and load up the data while we are setting up
+cardio_data = read.csv("cardio_train.csv", sep=";")
+```
+
+## Introduction
+
+What I want to find is to find the best and highest correlative data points to select features to create a predictor for heart disease, and which model will be the most accurate.
+
+## Questions for data
+
+* Cholesterol is usually a well known contributor to heart disease, how strong is this correlative relationship?
+
+* Subjective data from the subject may not be reliable, but in this case how is the correlation of these data points compared to those data points that are factual?
+
+* Is there a particular group of people that are most affected by heart disease, can this give us insight to what to look for.
+
+* What model is best at classifying or correctly predict the presence of heart disease based on the variables I have available.
+
+* In the best models with the highest accuracy, what data points have the biggest impact on prediction.
+
+
+## Approach
+
+My approach will first be to find those variables with the highest correlation with the target variable and run multiple models with multiple combinations of predictive features. I will then identify those features in the best performing models that had the highest impact on the categorization.
+
+## Details about Data
+
+The dataset that I have selected is from kaggle, and contains a mixture of binary classifications, groups of classifiers, and various numeric (float and integer) datapoints. As well some of these datapoints are objective and therefore are factual, but some of these subjective such as activity levels and are determined more by the subject. Below is the description of that data from https://www.kaggle.com/sulianova/cardiovascular-disease-dataset:
+
+* Age | Objective Feature | age | int (days)
+
+* Height | Objective Feature | height | int (cm) |
+
+* Weight | Objective Feature | weight | float (kg) |
+
+* Gender | Objective Feature | gender | categorical code |
+
+* Systolic blood pressure | Examination Feature | ap_hi | int |
+
+* Diastolic blood pressure | Examination Feature | ap_lo | int |
+
+* Cholesterol | Examination Feature | cholesterol | 1: normal, 2: above normal, 3: well above normal |
+
+* Glucose | Examination Feature | gluc | 1: normal, 2: above normal, 3: well above normal |
+
+* Smoking | Subjective Feature | smoke | binary |
+
+* Alcohol intake | Subjective Feature | alco | binary |
+
+* Physical activity | Subjective Feature | active | binary |
+
+* Presence or absence of cardiovascular disease | Target Variable | cardio | binary |
+
+The objective and examination features are both fairly factual, one being pretty standard factual information about the person and the other being the results from a doctor examining that subject. However some of the data like cholesterol and glucose is not fully quantified and is simply a classifier of how high those levels were. The other subjective data points is information from the patient so it may be less accurate. The target variable is also factual, and luckily each field is filled out for the entire dataset of 70,000 records.
+
+## Required or Recommended Packages
+
+* ggplot2
+
+* class
+
+* dplyr
+
+* e1071
+
+* caret
+
+
+## Plots and Diagrams that will be used
+
+* Scatterplots - will illustrate data points and color to identify which of them has heart disease.
+
+* Bar Chart - will illustrate the accuracies of multiple logistic models depending on the variables it incorporates
+
+* Point plots with lines - will illustrate the accruacy of clutering models
+
+## Data Cleaning, Data Summary, and Initial Visualizations
+
+First what needs to be done is a simple process to evaluate the quality of the data and then complete some basic data cleaning and visualizations. The visualizations in combination with some of the data summary overviews will give decent insight to the quality of the data before and after.
+
+Here we are going to clean the data on what was recommended were some realistic boundaries, and the rest would have to be considered either bad data (like negative blood pressure values) or outliers.
+
+To get a simple summary of the data, I will be using the summary command, and will compare the summary outputs from before and after data cleaning.
+
+Then for the initial visualizations of some of these data points will be via scatter plots with a related data point (weight and height, systolic and diastolic blood pressure). These will not initially incorporate color to identify whether or not that individual has heart disease but is to show outliers and their effect on the data as a whole.
+
+```{r basic_data_info}
+  # Nothing really seems out of the ordinary, but pay close attention to the min and max values
+  # There are some extreme outliers for height, weight, ap_hi, and ap_lo. Som of which may not be very likely or possible
+  summary(cardio_data)
+
+  # To get a better look at the outlier here are two scatterplots that will show that there are some we may want to pull out
+  ggplot(cardio_data, aes(x=height,y=weight)) +
+    geom_point(alpha=0.1)
+
+  # And blood pressure, systolic (hi) and diastolic (lo) have some outliers that shouldn't exist like negative numbers or extremly high numbers
+  # Otherwise this data would look very different distributed in the graph
+  ggplot(cardio_data, aes(x=ap_hi,y=ap_lo)) +
+    geom_point(alpha=0.1)
+
+  # For height and weight there is a high concentration in the center so I am going to start to pull out some records
+  clean_cardio_data = cardio_data %>%
+    # Removing those outlier based on height,
+    filter(height>=100 & height<=200) %>%
+    # There are a few outliers that have a low weight or even too heigh of a weight
+    filter(weight>=25 & weight<=150) %>%
+    # Going to filter by systolic blood pressure
+    filter(ap_hi>=90 & ap_hi<=170) %>%
+    # Finally by diastolic blood pressure
+    filter(ap_lo>=65 & ap_lo<=105) %>%
+    # Get non-duplicated records
+    unique
+
+  # Doing one last thing to ensure that the indicator for cardio is easy to handle by putting it as a factor
+  clean_cardio_data$disease = factor(NA, levels=c(NA, "No", "Yes"))
+  clean_cardio_data$disease[clean_cardio_data$cardio==1] = "Yes"
+  clean_cardio_data$disease[clean_cardio_data$cardio==0] = "No"
+
+  # It looks like there might be some more parsing down that we may need to do but both plots look much better
+  ggplot(clean_cardio_data, aes(x=height,y=weight)) +
+    geom_point(alpha=0.1)
+
+  ggplot(clean_cardio_data, aes(x=ap_hi,y=ap_lo)) +
+    geom_point(alpha=0.1)
+
+  summary(clean_cardio_data)
+```
+
+## Views of the Data
+
+The data will be sliced in multiple ways for various uses. One way that I will be slicing the data will be into training and testing sets for modeling. But with that as well I plan to separate them into the two gender codes available to see if there are different patterns or relationships emerge from similar analyses, as well as seeing how the inclusion of some outliers may affect the accuracy of the models.
+
+As for creating new points, I do not see a benefit since there really isn't much data mining I can do, technically I can calculate BMI but this may be limited since it is directly related and calculated from weight, height, and age. Thus for this project there will be no new data points created.
+
+## Machine Learning
+
+I do plan on using machine learning to answer my questions, primarily because I want to see if kmeans or knn might be able to find patterns that aren’t obvious to me, and what model regression or otherwise can create the most accurate model.
+
+## Looking for Initial Patterns
+
+Next some simple noticeable patterns in visualizations and through usages of other commands will give more insights to non-obvious patterns.
+
+```{r first_viz}
+  ggplot(clean_cardio_data,aes(x=age,y=weight, color=disease)) +
+    geom_point()
+
+```
+
+From this initial visualization that I've rendered is using age on the x axis and weight on the y, with two colors depicting the detection of heart disease. A pattern we can pickout here is that the heavier and older the person, it seems that they are more prone to heart disease, since there is a large amount of clustering of the color that was positive for heart disease in the top right corner. Another thing we can see is that across all weights the detection of heart disease at nearly all weights the later in life they get.
+
+```{r age_weight_by_gender}
+  ggplot(clean_cardio_data,aes(x=age,y=gender, color=disease)) +
+    geom_point() +
+    geom_jitter()
+
+  ggplot(clean_cardio_data,aes(x=weight,y=gender, color=disease)) +
+    geom_point() +
+    geom_jitter()
+```
+
+Something I was curious about here is if we separated the records by gender if there would be different patterns. Here I found that there seems be some interesting trends here, had to put age on the y axis and put on some jitter to visualize it in a meaningful way, but it does affect the gender differently. We can see that gender identification 2 across both weight and age has positive heart disease indicators more spread out and less concentrated than gender identification 1. I think this may lead to predictors to possibly be better or more accurate when considering with records of gender ID 1, but this can only be confirmed when building models.
+
+```{r variance}
+  # This is a bit like swallowing the ocean but we are going to ignore those records in reference to the cardio variable and
+  var(clean_cardio_data[setdiff(colnames(clean_cardio_data), c("disease")) ])
+```
+
+Something difficult with my dataset is that because it's so large the shapiro.wiki command to check if data can fit a normal distribution so that test may not be helpful here. So the variance and covariance test due to this may have some limitations, but regression testing and other models should have plenty of data.
+  ggplot(clean_cardio_data,aes(x=age,y=gender, color=as.factor(cardio))) +
+    geom_point() +
+    geom_jitter()
+
+However, we can see with the variance calculations that there is a high amount of variance between the age of a person and the cardio variable. In comparison as well the weight variable does have some variance with cardio that suggests that they may have a fairly positive relationship here, as well as their relationship with both systolic and diastolic blood pressure. The rest of the relationships seem to have extremely small amounts of variance with the cardio indicator are so very small and go just barely positive or negative. This doesn't really prove much except some strength and directionality of the variance of variables with cardio. This does support what we were able to visualize previously.
+
+Next we will look at the covariance between all of the variables, which should tell us more of the strength of a relationship between two variables.
+
+```{r correlation}
+  cor(clean_cardio_data[setdiff(colnames(clean_cardio_data), c("disease")) ])
+```
+
+It seems as if age does have some small relationship with age, weight, cholesterol, and blood pressure readings with cardio. Another thing to note here though that might cause some interference in modeling is that these variables have a high amount of covariance with each other, which may indicatete that these variables are not independent with each other.
+
+## Splitting Datasets for Modeling
+
+For cross-validation to make sure created models aren't over-fitted we need to split the data into a training set and a testing set. This will be relatively simple since we have such a large data set to sample from, and for this exercise I am just putting 80% of the records into the training data and the remainder to be used in the testing data.
+
+```{r splitting_data}
+  # Going to start split the data very quickly into to two sets with 80% in training and 20% in test
+  training_index1 = sample(1:nrow(clean_cardio_data), size=round(nrow(clean_cardio_data)*0.8))
+  train_cardio_data = clean_cardio_data[ training_index1, ]
+  test_cardio_data  = clean_cardio_data[-training_index1, ]
+```
+
+## Simple Logistic Regression Models
+
+What we are going to do here is create some simple initial models with a single variable being used to predict whether or not that individual has cardiovascular disease. Creation of the model will use the training data and then the prediction will be done with the test data, with a confusion matrix being created for evaluation of the model in comparison to the actuals.
+
+```{r s_linear_models}
+  # Now we are going to checkout various simple linear models and look at their accuracy
+  # Will not look at all of them but those that I suspect would be helpful indicators in a larger model
+
+  s_glm1 = glm(cardio ~ age, data=train_cardio_data, family=binomial)
+  summary(s_glm1)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm1, test_cardio_data, type="response"))) )
+
+  s_glm2 = glm(cardio ~ gender, data=train_cardio_data, family=binomial)
+  summary(s_glm2)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm2, test_cardio_data, type="response"))) )
+
+  s_glm3 = glm(cardio ~ height, data=train_cardio_data, family=binomial)
+  summary(s_glm3)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm3, test_cardio_data, type="response"))) )
+
+  s_glm4 = glm(cardio ~ weight, data=train_cardio_data, family=binomial)
+  summary(s_glm4)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm4, test_cardio_data, type="response"))) )
+
+  s_glm5 = glm(cardio ~ ap_hi, data=train_cardio_data, family=binomial)
+  summary(s_glm5)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm5, test_cardio_data, type="response"))) )
+
+  s_glm6 = glm(cardio ~ ap_lo, data=train_cardio_data, family=binomial)
+  summary(s_glm6)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm6, test_cardio_data, type="response"))) )
+
+  s_glm7 = glm(cardio ~ cholesterol, data=train_cardio_data, family=binomial)
+  summary(s_glm7)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm7, test_cardio_data, type="response"))) )
+
+  s_glm8 = glm(cardio ~ gluc, data=train_cardio_data, family=binomial)
+  summary(s_glm8)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm8, test_cardio_data, type="response"))) )
+
+  s_glm9 = glm(cardio ~ active, data=train_cardio_data, family=binomial)
+  summary(s_glm9)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(s_glm9, test_cardio_data, type="response"))) )
+```
+
+The above models and analysis had confirmed something that I was fairly certain of, and that is that no single variable alone is a great indicator of heart disease. Most are just above a coin toss chance of predicting correctly, just around 50%, with exception to systolic blood pressure (ap_hi) which had a fairly high prediction rating in comparison (~70% during my initial tests). This could paritally be due to some statistical anomaly of sampling.
+
+## Multiple Logistic Regression Modeling
+
+Next
+
+```{r mult_logit_models}
+  # Now we are going to be using various models with different formulas and try to findout which one is most accurate
+
+  # This one is one of the more promising ones I think because it's puretly objective and oversational features that seemed to have patterns in visualizations and previous models
+  m_glm1 = glm(cardio ~ age + ap_hi + ap_lo, train_cardio_data, family=binomial)
+  summary(m_glm1)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm1, test_cardio_data, type="response"))) )
+
+  m_glm2 = glm(cardio ~ age + gender + weight + ap_hi + ap_lo, train_cardio_data, family=binomial)
+  summary(m_glm2)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm2, test_cardio_data, type="response"))) )
+
+  m_glm3 = glm(cardio ~ age + gender + weight + ap_hi + ap_lo + cholesterol, train_cardio_data, family=binomial)
+  summary(m_glm3)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm3, test_cardio_data, type="response"))) )
+
+  m_glm4 = glm(cardio ~ age + gender + weight + ap_hi + ap_lo + cholesterol + gluc, train_cardio_data, family=binomial)
+  summary(m_glm4)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm4, test_cardio_data, type="response"))) )
+
+  m_glm5 = glm(cardio ~ age + gender + weight + ap_hi + ap_lo + cholesterol + gluc + active, train_cardio_data, family=binomial)
+  summary(m_glm5)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm5, test_cardio_data, type="response"))) )
+
+  m_glm6 = glm(cardio ~ age + gender + weight + ap_hi + ap_lo + cholesterol + gluc + smoke + alco + active, train_cardio_data, family=binomial)
+  summary(m_glm6)
+  confusionMatrix(table(test_cardio_data$cardio, round(predict(m_glm6, test_cardio_data, type="response"))) )
+```
+
+With the usage of logistic regression models with multiple independent variables, we do see a mark improvement over most of the models with only a single variable. THe average accuracy of those single variable models was typically around 50% or 60% with the exception of the systolic blood pressure measurement which is around 70%. The accuracy of most of these models seems to top out around 72.x% during my multitude of tests and is usually either the 4th model or the final that incorporates all datapoints.
+
+## Clustering Analysis
+
+Then some clustering analysis should be done to see if there are more accurate patterns or even better prediction models using capabilities of cluster analysis. If they are more accurate, what are they using or what variables are being used heavily in the prediction, is something that should be investigated.
+
+```{r clustering}
+  # First let's use the knn algorithm and see if there is any patterns it can draw on
+
+  # Colnames of all available variables
+  var_cols1 = c("age", "gender", "height", "weight", "ap_hi", "ap_lo", "cholesterol", "gluc", "smoke", "alco", "active")
+  var_cols2 = c("age", "gender", "height", "weight", "ap_hi", "ap_lo", "cholesterol", "gluc", "active")
+  var_cols3 = c("age", "height", "weight", "ap_hi", "ap_lo", "cholesterol", "gluc", "active")
+
+  # Going to run for a number of values of k for the clustering
+  knn_accs1 = sapply(1:50, function(x){
+    confusionMatrix(test_cardio_data$disease, knn( train=train_cardio_data[var_cols1], test=test_cardio_data[var_cols1], cl=train_cardio_data$disease, k=x))$overall['Accuracy']
+  })
+
+  knn_accs2 = sapply(1:50, function(x){
+    confusionMatrix(test_cardio_data$disease, knn( train=train_cardio_data[var_cols2], test=test_cardio_data[var_cols2], cl=train_cardio_data$disease, k=x))$overall['Accuracy']
+  })
+
+  knn_accs3 = sapply(1:50, function(x){
+    confusionMatrix(test_cardio_data$disease, knn( train=train_cardio_data[var_cols3], test=test_cardio_data[var_cols3], cl=train_cardio_data$disease, k=x))$overall['Accuracy']
+  })
+
+  # So we aren't able to directly visualize what's being identified here but we can take a look at the accuracies of each model created with a different value of k
+  knn_models = rbind(data.frame(k=1:50, accuracy=knn_accs1, model="1"), data.frame(k=1:50, accuracy=knn_accs2, model="2"), data.frame(k=1:50, accuracy=knn_accs3, model="3"))
+  ggplot(knn_models, aes(x=k, y=accuracy, color=factor(model))) +
+    geom_point() +
+    geom_line()
+
+```
+
+So there seems to be a point to which the accuracy of knn will max out, and for most of the cluster analysis that are run with various combinations of columns. The unfortunate part is that it maxes out around the same rate as the multivariate logistic models. They have relatively the same amount of accuracy, and the most effective value of k is around 25. This does make me question the accuracy or improvements that those columns I parsed out of the column sets, if they didn't have any noticeable effect on the accuracy of the knn cluster analysis. That would lead me to believe that for a cluster analysis the variables that provide the best value are in var_cols3, and it is possible to remove more of those.
+
+## Gender Differences
+
+Now that we have done enough analysis for some of this we are going to look at the same types of analysis but we are going to separate out the datasets based on gender and try to rebuild the same models and test their accuracy. The question becomes if we build separate models for different genders, can we improve the accuracy of one or more models. This time instead of just looking at the raw results here we are going to visualize them.
+
+```{r sep_gender_codes}
+  # Split training data by the
+  training_index_gen1    = sample(1:nrow(clean_cardio_data[ clean_cardio_data$gender==1, ]), size=round(nrow(clean_cardio_data[ clean_cardio_data$gender==1, ])*0.8))
+  train_cardio_data_gen1 = clean_cardio_data[ training_index_gen1, ]
+  test_cardio_data_gen1  = clean_cardio_data[-training_index_gen1, ]
+
+  training_index_gen2    = sample(1:nrow(clean_cardio_data[ clean_cardio_data$gender==2, ]), size=round(nrow(clean_cardio_data[ clean_cardio_data$gender==2, ])*0.8))
+  train_cardio_data_gen2 = clean_cardio_data[ training_index_gen2, ]
+  test_cardio_data_gen2  = clean_cardio_data[-training_index_gen2, ]
+
+  # No re-run and test the accuracy of some of the better performing models to limit our scope here, but simply removing gender as a variable in these sets
+  m_glm1_gen1 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc, train_cardio_data_gen1, family=binomial)
+  summary(m_glm1_gen1)
+  conf_matx1_gen1 = confusionMatrix(table(test_cardio_data_gen1$cardio, round(predict(m_glm1_gen1, test_cardio_data_gen1, type="response"))) )
+
+  m_glm2_gen1 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc + active, train_cardio_data_gen1, family=binomial)
+  summary(m_glm2_gen1)
+  conf_matx2_gen1 = confusionMatrix(table(test_cardio_data_gen1$cardio, round(predict(m_glm2_gen1, test_cardio_data_gen1, type="response"))) )
+
+  m_glm3_gen1 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc + smoke + alco + active, train_cardio_data_gen1, family=binomial)
+  summary(m_glm3_gen1)
+  conf_matx3_gen1 = confusionMatrix(table(test_cardio_data_gen1$cardio, round(predict(m_glm3_gen1, test_cardio_data_gen1, type="response"))) )
+
+
+  m_glm1_gen2 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc, train_cardio_data_gen2, family=binomial)
+  summary(m_glm1_gen2)
+  conf_matx1_gen2 = confusionMatrix(table(test_cardio_data_gen2$cardio, round(predict(m_glm1_gen2, test_cardio_data_gen2, type="response"))) )
+
+  m_glm2_gen2 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc + active, train_cardio_data_gen2, family=binomial)
+  summary(m_glm2_gen2)
+  conf_matx2_gen2 = confusionMatrix(table(test_cardio_data_gen2$cardio, round(predict(m_glm2_gen2, test_cardio_data_gen2, type="response"))) )
+
+  m_glm3_gen2 = glm(cardio ~ age + weight + ap_hi + ap_lo + cholesterol + gluc + smoke + alco + active, train_cardio_data_gen2, family=binomial)
+  summary(m_glm3_gen2)
+  conf_matx3_gen2 = confusionMatrix(table(test_cardio_data_gen2$cardio, round(predict(m_glm3_gen2, test_cardio_data_gen2, type="response"))) )
+
+  # Now to create a dataframe with the accuracies of all of these models and visualize them in a comparisson4
+  accs_models_gens_c = c(conf_matx1_gen1$overall["Accuracy"], conf_matx2_gen1$overall["Accuracy"], conf_matx3_gen1$overall["Accuracy"],
+                         conf_matx1_gen2$overall["Accuracy"], conf_matx2_gen2$overall["Accuracy"], conf_matx3_gen2$overall["Accuracy"]
+                       )
+
+  accs_models_gen_df = data.frame(
+    gender_code = c(1, 1, 1, 2, 2, 2),
+    model_type  = c("model1", "model2", "model3", "model1", "model2", "model3"),
+    accuracy = accs_models_gens_c
+  )
+
+  # Going to create a barchart here
+  ggplot(accs_models_gen_df, aes(x=model_type, y=accuracy, fill=factor(gender_code))) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    # Our data is so close and we know the max here so we are gonig to scale y here
+    coord_cartesian(ylim=c(min(accs_models_gens_c)-0.05,max(accs_models_gens_c)+0.05))
+
+  # Finally let's take a look at the clustering model between the two, and comparsre the accuracy of both
+  var_cols_gen = c("age", "height", "weight", "ap_hi", "ap_lo", "cholesterol", "gluc", "active")
+
+  knn_accs_gen1 = sapply(1:50, function(x){
+    confusionMatrix(test_cardio_data_gen1$disease, knn( train=train_cardio_data_gen1[var_cols_gen], test=test_cardio_data_gen1[var_cols_gen], cl=train_cardio_data_gen1$disease, k=x))$overall['Accuracy']
+  })
+
+  knn_accs_gen2 = sapply(1:50, function(x){
+    confusionMatrix(test_cardio_data_gen2$disease, knn( train=train_cardio_data_gen2[var_cols_gen], test=test_cardio_data_gen2[var_cols_gen], cl=train_cardio_data_gen2$disease, k=x))$overall['Accuracy']
+  })
+
+  # Very similarly to our previous cluster analysis accuracies comparison, we are goint to look at these accruacis in a line plot
+  knn_models_gen = rbind(data.frame(k=1:50, accuracy=knn_accs_gen1, gender_code="1"), data.frame(k=1:50, accuracy=knn_accs_gen2, gender_code="2"))
+  ggplot(knn_models_gen, aes(x=k, y=accuracy, color=factor(gender_code))) +
+    geom_point() +
+    geom_line()
+```
+
+Here we had some fascinating results, but my overall conclusion is that these models do differ in accuracy depending on the gender, and could possibly affect the accuracy of a model the incorporates both. For the first set of multivariate Logistic models, we see a trend upwards to the later models becoming more accurate but an interesting difference in each is that the accuracy of models that are built and testing off of gender code 2 seem to be just less accurate.
+
+Now when it comes to the cluster models using the knn algorithm we see a vast difference in the performance of modeling and prediction based on different genders. We still see that clustering algorithms are still overall just a little less accurate with a plateau around k=25, but we see that gender 2's models are much less accurate for predictions.
+
+## Limitations
+
+The limitations that are faced here are primarily due to data points that are available and possibly time for new models to be designed and built. The limitations of the data would be the limitation of features that are more opinion driven by answers of the subject, I do think it is possibly better to have their view or rating on their activity or intakes of certain substances but it may be too subjective. For example instead of gluc being their response to a question about how much sugar they consume, we could instead take their blood sugar levels, and similar methods for other subjective data points that we have here.
+
+## Conclusions
+
+The take away here is that the information gathered was enough to answer many of the starting questions here. The more accurate models that were designed in this project primarily on logistic multivariate models that incorporated more of the variables available in this project, and clustering models didn't find any patterns that made it more accurate that logistic models. This was a bit of a surprise considering I thought there may be more patterns that were less linear, but the clustering algorithms didn't perform predictions better. Another conclusion that can be drawn is that gender in this case can play a considerable role in the accuracy of these models.
+
+## Future Works
+
+What should be done in the future is by gathering more objective data where possible, and attempting new patterns to both slice up the data and create new models that may have better predictions performance.
