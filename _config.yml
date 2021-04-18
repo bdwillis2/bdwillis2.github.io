@@ -36,6 +36,7 @@ markdown: kramdown
 
 exclude:
   - projects/*.Rmd
+  - projects/*.md
   - .sass-cache/
   - .jekyll-cache/
   - gemfiles/
