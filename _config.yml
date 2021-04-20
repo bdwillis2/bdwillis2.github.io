@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Berkeley Willis' GitHub Portfolio
+title: Berkeley's GitHub Portfolio
 email: bwillis@my365.bellevue.edu
 description: >- # this means to ignore newlines until "baseurl:"
   The Data Science portfolio for Berkeley Willis, will contain mostly Data
@@ -26,9 +26,10 @@ description: >- # this means to ignore newlines until "baseurl:"
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://bdwillis2.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  bdwillis2
+timezone: 'America/Chicago'
 
 # Build settings
-theme: minima
+theme: jekyll-theme-slate
 plugins:
   - jekyll-feed
 
