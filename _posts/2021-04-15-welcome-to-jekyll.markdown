@@ -1,8 +1,9 @@
 ---
-layout: post
+layouts: post
 title:  "Weather Reports using Python PEP 8"
-date:   2021-04-15
+date:   2021-04-15 00:23:12 -0500
 categories: python_projects
+published: true
 ---
 
 # Weather API example
