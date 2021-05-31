@@ -4551,7 +4551,7 @@ form{
   .bp3-running-text table th, table.bp3-html-table th{
     color:#182026;
     font-weight:600; }
-  
+
   .bp3-running-text table td,
   table.bp3-html-table td{
     color:#182026; }
@@ -13557,7 +13557,6 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 }
 
 .jp-Notebook {
-  padding: var(--jp-notebook-padding);
   outline: none;
   overflow: auto;
   background: var(--jp-layout-color0);
@@ -14238,17 +14237,17 @@ a.anchor-link {
                 },
                 displayAlign: 'center',
                 CommonHTML: {
-                    linebreaks: { 
-                    automatic: true 
+                    linebreaks: {
+                    automatic: true
                     }
                 },
                 "HTML-CSS": {
-                    linebreaks: { 
-                    automatic: true 
+                    linebreaks: {
+                    automatic: true
                     }
                 }
             });
-        
+
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
@@ -14370,7 +14369,7 @@ Date: 2020-05-26</p>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -14383,7 +14382,7 @@ We started with 6234 records, and only have 4265 movies
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -14710,7 +14709,7 @@ We started with 6234 records, and only have 4265 movies
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -14733,7 +14732,7 @@ Left with 1000 records after de-dup
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -14902,7 +14901,7 @@ Left with 1000 records after de-dup
     <span class="n">original_langauges</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">adult_indicators</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">overviews</span> <span class="o">=</span> <span class="p">[]</span>
-    
+
     <span class="c1"># For each json object, get the information that is relevant</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">p_json</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">]:</span>
         <span class="n">popularity_l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;popularity&#39;</span><span class="p">])</span>
@@ -14915,7 +14914,7 @@ Left with 1000 records after de-dup
         <span class="n">original_langauges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;original_language&#39;</span><span class="p">])</span>
         <span class="n">adult_indicators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;adult&#39;</span><span class="p">])</span>
         <span class="n">overviews</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;overview&#39;</span><span class="p">])</span>
-    
+
     <span class="c1"># Then combine them into a single data frame</span>
     <span class="n">tmp_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span><span class="s2">&quot;popularity&quot;</span><span class="p">:</span><span class="n">popularity_l</span><span class="p">,</span><span class="s2">&quot;video&quot;</span><span class="p">:</span><span class="n">video_l</span><span class="p">,</span><span class="s2">&quot;votes&quot;</span><span class="p">:</span><span class="n">vote_counts</span><span class="p">,</span><span class="s2">&quot;vote_average&quot;</span><span class="p">:</span><span class="n">vote_avgs</span><span class="p">,</span>
@@ -15019,7 +15018,7 @@ Left with 1000 records after de-dup
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15115,7 +15114,7 @@ dtype: object
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15280,7 +15279,7 @@ dtype: object
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15495,7 +15494,7 @@ dtype: object
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15559,7 +15558,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <span class="c1"># Going to cheat and run boolean vectors to sum, which will give us count of true values</span>
 <span class="n">source_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_movies_df</span><span class="o">.</span><span class="n">netflix</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">full_movies_df</span><span class="o">.</span><span class="n">imdb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">full_movies_df</span><span class="o">.</span><span class="n">moviedb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
-               <span class="n">full_movies_df</span><span class="o">.</span><span class="n">netflix_imdb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">full_movies_df</span><span class="o">.</span><span class="n">netflix_moviedb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> 
+               <span class="n">full_movies_df</span><span class="o">.</span><span class="n">netflix_imdb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">full_movies_df</span><span class="o">.</span><span class="n">netflix_moviedb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
                <span class="n">full_movies_df</span><span class="o">.</span><span class="n">imdb_moviedb</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">full_movies_df</span><span class="o">.</span><span class="n">all_three</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
               <span class="p">]</span>
 <span class="n">source_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Netflix&quot;</span><span class="p">,</span> <span class="s2">&quot;IMDB&quot;</span><span class="p">,</span> <span class="s2">&quot;MovieDB&quot;</span><span class="p">,</span> <span class="s2">&quot;Netflix &amp; IMDB&quot;</span><span class="p">,</span> <span class="s2">&quot;Netflix &amp; MovieDB&quot;</span><span class="p">,</span> <span class="s2">&quot;IMDB &amp; MovieDB&quot;</span><span class="p">,</span> <span class="s2">&quot;All three&quot;</span><span class="p">]</span>
@@ -15595,7 +15594,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15646,7 +15645,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15697,7 +15696,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15746,7 +15745,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
 
 
@@ -15760,7 +15759,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15814,20 +15813,20 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>/usr/local/lib/python3.6/site-packages/ipykernel_launcher.py:2: UserWarning: Pandas doesn&#39;t allow columns to be created via a new attribute name - see https://pandas.pydata.org/pandas-docs/stable/indexing.html#attribute-access
-  
+
 </pre>
 </div>
 </div>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
 
 
@@ -15841,7 +15840,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15913,7 +15912,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
@@ -15937,7 +15936,7 @@ However do consider that when doing an analysis on cleaned data for visualizatio
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class=" highlight hl-ipython3"><pre><span></span>
 </pre></div>
 
      </div>

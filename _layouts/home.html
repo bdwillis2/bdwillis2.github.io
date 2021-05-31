@@ -9,6 +9,7 @@ layout: default
 
   {{ content }}
 
+
   {%- if site.posts.size > 0 -%}
     <h2 class="post-list-heading">{{ page.list_title | default: "Projects" }}</h2>
     <ul class="post-list">
@@ -16,17 +17,26 @@ layout: default
       <li>
         <!-- {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%} -->
         <!-- <span class="post-meta">{{ post.date | date: date_format }}</span> -->
-        <h3>
-          <a class="post-link" href="{{ post.url | relative_url }}">
-            {{ post.title | escape }}
-          </a>
-        </h3>
-        {%- if site.show_excerpts -%}
-          {{ post.excerpt }}
-        {%- endif -%}
+        <div>
+          <h3>
+            <a class="post-link" href="{{ post.url | relative_url }}">
+              {{ post.title | escape }}
+            </a>
+          </h3>
+          {%- if post.thumbnail -%}
+            <img class="project-thumbnail" src="{{ post.thumbnail | relative_url }}">
+          {%- endif -%}
+          {%- if site.show_excerpts -%}
+            {{ post.excerpt }}
+          {%- endif -%}
+        </div>
       </li>
       {%- endfor -%}
     </ul>
   {%- endif -%}
+
+  <h2>Other Links</h2>
+
+  <h3><a href="downloads/WillisBerkeleyResume.pdf">Resume Download</a></h3>
 
 </div>

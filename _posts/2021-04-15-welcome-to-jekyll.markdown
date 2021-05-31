@@ -4,6 +4,7 @@ title:  "Weather Reports using Python PEP 8"
 date:   2021-04-15 00:23:12 -0500
 categories: python_projects
 published: true
+thumbnail: thumbnails/python_code.jpeg
 ---
 
 # Weather API example
