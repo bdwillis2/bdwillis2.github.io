@@ -130,6 +130,12 @@ strong {
   font-weight: bold;
 }
 
+.project-thumbnail {
+  display: grid;
+  width:100px;
+  height: auto;
+}
+
 img {
   position: relative;
   margin: 0 auto;

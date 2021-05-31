@@ -205,13 +205,13 @@ library(caret)</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre class="r"><code>library(data.table)</code></pre>
 <pre><code>## data.table 1.13.6 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com</code></pre>
-<pre><code>## 
+<pre><code>##
 ## Attaching package: &#39;data.table&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:reshape2&#39;:
-## 
+##
 ##     dcast, melt</code></pre>
 <pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
-## 
+##
 ##     between, first, last</code></pre>
 <pre class="r"><code>library(ggplot2)
 library(e1071)
@@ -219,13 +219,13 @@ library(rpart)
 library(randomForest)</code></pre>
 <pre><code>## randomForest 4.6-14</code></pre>
 <pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
-<pre><code>## 
+<pre><code>##
 ## Attaching package: &#39;randomForest&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
-## 
+##
 ##     margin</code></pre>
 <pre><code>## The following object is masked from &#39;package:dplyr&#39;:
-## 
+##
 ##     combine</code></pre>
 <p>With the libraries in place, it is now time to pull the data from the filesystem, and start doing some basic operations on it.</p>
 <p>For many of the models, for the simplicity that is, many of the numbers to boolean values. This will make it a bit easier to look at in visualization or in tabular form, and when aggregated it will seem a bit more straight forward.</p>
@@ -250,12 +250,12 @@ hf_records_dt %&gt;% head</code></pre>
 ## 6:  90       1                       47        0                40                   1    204000              2.1          132   1       1    8           1</code></pre>
 <pre class="r"><code># Let&#39;s start to see some of the possible data issues such as large numbers of NA&#39;s
 hf_records_dt %&gt;% summary</code></pre>
-<pre><code>##       age           anaemia       creatinine_phosphokinase    diabetes      ejection_fraction high_blood_pressure   platelets      serum_creatinine  serum_sodium        sex            smoking            time        DEATH_EVENT    
-##  Min.   :40.00   Min.   :0.0000   Min.   :  23.0           Min.   :0.0000   Min.   :14.00     Min.   :0.0000      Min.   : 25100   Min.   :0.500    Min.   :113.0   Min.   :0.0000   Min.   :0.0000   Min.   :  4.0   Min.   :0.0000  
-##  1st Qu.:51.00   1st Qu.:0.0000   1st Qu.: 116.5           1st Qu.:0.0000   1st Qu.:30.00     1st Qu.:0.0000      1st Qu.:212500   1st Qu.:0.900    1st Qu.:134.0   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.: 73.0   1st Qu.:0.0000  
-##  Median :60.00   Median :0.0000   Median : 250.0           Median :0.0000   Median :38.00     Median :0.0000      Median :262000   Median :1.100    Median :137.0   Median :1.0000   Median :0.0000   Median :115.0   Median :0.0000  
-##  Mean   :60.83   Mean   :0.4314   Mean   : 581.8           Mean   :0.4181   Mean   :38.08     Mean   :0.3512      Mean   :263358   Mean   :1.394    Mean   :136.6   Mean   :0.6488   Mean   :0.3211   Mean   :130.3   Mean   :0.3211  
-##  3rd Qu.:70.00   3rd Qu.:1.0000   3rd Qu.: 582.0           3rd Qu.:1.0000   3rd Qu.:45.00     3rd Qu.:1.0000      3rd Qu.:303500   3rd Qu.:1.400    3rd Qu.:140.0   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:203.0   3rd Qu.:1.0000  
+<pre><code>##       age           anaemia       creatinine_phosphokinase    diabetes      ejection_fraction high_blood_pressure   platelets      serum_creatinine  serum_sodium        sex            smoking            time        DEATH_EVENT
+##  Min.   :40.00   Min.   :0.0000   Min.   :  23.0           Min.   :0.0000   Min.   :14.00     Min.   :0.0000      Min.   : 25100   Min.   :0.500    Min.   :113.0   Min.   :0.0000   Min.   :0.0000   Min.   :  4.0   Min.   :0.0000
+##  1st Qu.:51.00   1st Qu.:0.0000   1st Qu.: 116.5           1st Qu.:0.0000   1st Qu.:30.00     1st Qu.:0.0000      1st Qu.:212500   1st Qu.:0.900    1st Qu.:134.0   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.: 73.0   1st Qu.:0.0000
+##  Median :60.00   Median :0.0000   Median : 250.0           Median :0.0000   Median :38.00     Median :0.0000      Median :262000   Median :1.100    Median :137.0   Median :1.0000   Median :0.0000   Median :115.0   Median :0.0000
+##  Mean   :60.83   Mean   :0.4314   Mean   : 581.8           Mean   :0.4181   Mean   :38.08     Mean   :0.3512      Mean   :263358   Mean   :1.394    Mean   :136.6   Mean   :0.6488   Mean   :0.3211   Mean   :130.3   Mean   :0.3211
+##  3rd Qu.:70.00   3rd Qu.:1.0000   3rd Qu.: 582.0           3rd Qu.:1.0000   3rd Qu.:45.00     3rd Qu.:1.0000      3rd Qu.:303500   3rd Qu.:1.400    3rd Qu.:140.0   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:203.0   3rd Qu.:1.0000
 ##  Max.   :95.00   Max.   :1.0000   Max.   :7861.0           Max.   :1.0000   Max.   :80.00     Max.   :1.0000      Max.   :850000   Max.   :9.400    Max.   :148.0   Max.   :1.0000   Max.   :1.0000   Max.   :285.0   Max.   :1.0000</code></pre>
 <pre class="r"><code># So from what we can see there doesn&#39;t need to be any major NA issues, but there might be some better
 # vector types for some of these values
@@ -279,12 +279,12 @@ hf_records_dt$age = as.integer(hf_records_dt$age)</code></pre>
 <p>With the data in a better place we can start to look at some various aspects of the data.</p>
 <p>Quick easy thing to chekcout is a summary</p>
 <pre class="r"><code>hf_records_dt %&gt;% summary</code></pre>
-<pre><code>##       age         anaemia        creatinine_phosphokinase  diabetes       ejection_fraction high_blood_pressure   platelets      serum_creatinine  serum_sodium   sex      smoking             time       DEATH_EVENT    
-##  Min.   :40.00   Mode :logical   Min.   :  23.0           Mode :logical   Min.   :14.00     Mode :logical       Min.   : 25100   Min.   :0.500    Min.   :113.0   0:105   Mode :logical   Min.   :  4.0   Mode :logical  
-##  1st Qu.:51.00   FALSE:170       1st Qu.: 116.5           FALSE:174       1st Qu.:30.00     FALSE:194           1st Qu.:212500   1st Qu.:0.900    1st Qu.:134.0   1:194   FALSE:203       1st Qu.: 73.0   FALSE:203      
-##  Median :60.00   TRUE :129       Median : 250.0           TRUE :125       Median :38.00     TRUE :105           Median :262000   Median :1.100    Median :137.0           TRUE :96        Median :115.0   TRUE :96       
-##  Mean   :60.83                   Mean   : 581.8                           Mean   :38.08                         Mean   :263358   Mean   :1.394    Mean   :136.6                           Mean   :130.3                  
-##  3rd Qu.:70.00                   3rd Qu.: 582.0                           3rd Qu.:45.00                         3rd Qu.:303500   3rd Qu.:1.400    3rd Qu.:140.0                           3rd Qu.:203.0                  
+<pre><code>##       age         anaemia        creatinine_phosphokinase  diabetes       ejection_fraction high_blood_pressure   platelets      serum_creatinine  serum_sodium   sex      smoking             time       DEATH_EVENT
+##  Min.   :40.00   Mode :logical   Min.   :  23.0           Mode :logical   Min.   :14.00     Mode :logical       Min.   : 25100   Min.   :0.500    Min.   :113.0   0:105   Mode :logical   Min.   :  4.0   Mode :logical
+##  1st Qu.:51.00   FALSE:170       1st Qu.: 116.5           FALSE:174       1st Qu.:30.00     FALSE:194           1st Qu.:212500   1st Qu.:0.900    1st Qu.:134.0   1:194   FALSE:203       1st Qu.: 73.0   FALSE:203
+##  Median :60.00   TRUE :129       Median : 250.0           TRUE :125       Median :38.00     TRUE :105           Median :262000   Median :1.100    Median :137.0           TRUE :96        Median :115.0   TRUE :96
+##  Mean   :60.83                   Mean   : 581.8                           Mean   :38.08                         Mean   :263358   Mean   :1.394    Mean   :136.6                           Mean   :130.3
+##  3rd Qu.:70.00                   3rd Qu.: 582.0                           3rd Qu.:45.00                         3rd Qu.:303500   3rd Qu.:1.400    3rd Qu.:140.0                           3rd Qu.:203.0
 ##  Max.   :95.00                   Max.   :7861.0                           Max.   :80.00                         Max.   :850000   Max.   :9.400    Max.   :148.0                           Max.   :285.0</code></pre>
 <p>This gives a good idea of what is available and the general state of the data. Nothing is necessarily going to be conclusive here, but we can see certain aspects of the data. For example there is a particular gender that is more represented here, and many don’t really suffer from high blood pressure.</p>
 <p>With that said it is better to be able to see some basic visualizations showing the correlative heat map, and some visualizations of scatter plots between a set of variables.</p>
@@ -751,31 +751,31 @@ tmp_table = validation_table$table
 
 validation_table</code></pre>
 <pre><code>## Confusion Matrix and Statistics
-## 
-##                 
+##
+##
 ## validation_preds  0  1
 ##                0 44  2
 ##                1  1 13
-##                                           
-##                Accuracy : 0.95            
+##
+##                Accuracy : 0.95
 ##                  95% CI : (0.8608, 0.9896)
-##     No Information Rate : 0.75            
-##     P-Value [Acc &gt; NIR] : 4.736e-05       
-##                                           
-##                   Kappa : 0.8636          
-##                                           
-##  Mcnemar&#39;s Test P-Value : 1               
-##                                           
-##             Sensitivity : 0.9778          
-##             Specificity : 0.8667          
-##          Pos Pred Value : 0.9565          
-##          Neg Pred Value : 0.9286          
-##              Prevalence : 0.7500          
-##          Detection Rate : 0.7333          
-##    Detection Prevalence : 0.7667          
-##       Balanced Accuracy : 0.9222          
-##                                           
-##        &#39;Positive&#39; Class : 0               
+##     No Information Rate : 0.75
+##     P-Value [Acc &gt; NIR] : 4.736e-05
+##
+##                   Kappa : 0.8636
+##
+##  Mcnemar&#39;s Test P-Value : 1
+##
+##             Sensitivity : 0.9778
+##             Specificity : 0.8667
+##          Pos Pred Value : 0.9565
+##          Neg Pred Value : 0.9286
+##              Prevalence : 0.7500
+##          Detection Rate : 0.7333
+##    Detection Prevalence : 0.7667
+##       Balanced Accuracy : 0.9222
+##
+##        &#39;Positive&#39; Class : 0
 ## </code></pre>
 <p>It is interesting how much change time injects here, I am curious how this feature is decided. Is there something a doctor is looking at that we don’t have access to at the moment in order to know that they should see this patient more often/sooner? Is what the doctor looking at available in raw data form, and then I would love to test the models using that data. The models built here are not really performing to the best possible, but they are hopefully something that could give an idea of those that would need to be monitored closer.</p>
 
